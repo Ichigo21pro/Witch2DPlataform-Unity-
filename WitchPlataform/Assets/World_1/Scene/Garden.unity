@@ -1566,14 +1566,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 11cb72ea902719245b7e585bf316ffd4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  moveSpeed: 5
-  acceleration: 10
-  deceleration: 10
-  jumpForce: 5
-  maxJumps: 2
-  dashForce: 15
-  dashDuration: 0.2
-  dashCooldown: 0.5
+  moveSpeed: 0.2
+  runSpeed: 0.3
+  rb: {fileID: 1652028437}
 --- !u!70 &1652028436
 CapsuleCollider2D:
   m_ObjectHideFlags: 0
