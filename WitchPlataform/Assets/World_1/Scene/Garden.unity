@@ -1159,7 +1159,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1104591360}
   m_Layer: 0
-  m_Name: Circle
+  m_Name: GroundCheck
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1495,7 +1495,7 @@ Transform:
   m_GameObject: {fileID: 1652028432}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: -85.44, y: -8.87, z: 0}
+  m_LocalPosition: {x: -84.66, y: -8.59, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -1628,14 +1628,17 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 11cb72ea902719245b7e585bf316ffd4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  moveSpeed: 0.2
-  runSpeed: 0.4
+  moveSpeed: 4
+  runSpeed: 7
   jumpForce: 7
   groundLayer:
     serializedVersion: 2
     m_Bits: 8
   groundCheck: {fileID: 1104591360}
   groundCheckRadius: 0.2
+  normalGravity: 2
+  fallGravity: 4.5
+  maxFallSpeed: -15
 --- !u!1 &1653737972
 GameObject:
   m_ObjectHideFlags: 0
