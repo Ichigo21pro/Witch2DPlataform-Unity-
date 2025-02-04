@@ -13,40 +13,60 @@ public class MoviminetoJugador : MonoBehaviour
     public float moveSpeed = 0.2f;
     public float runSpeed = 0.4f;
     bool running = false;
-    public Rigidbody2D rb;
+    private Rigidbody2D rb;
     Vector2 movement;
+    ////////////////////////////////////////
+    // (Salto space)
+    [Header("Jump Move")]
+    public float jumpForce = 7f;
+    // Variable para verificar si el jugador está en el suelo
+    private bool isGrounded;
+    // LayerMask para definir qué es el suelo
+    public LayerMask groundLayer;
+    // Transform para detectar el suelo
+    public Transform groundCheck;
+    public float groundCheckRadius = 0.2f;
     ////////////////////////////////////////
 
     private void Start()
     {
-       
-       
+        // Obtener el componente Rigidbody2D del jugador
+        rb = GetComponent<Rigidbody2D>();
     }
 
     private void Update()
     {
         ////////////////////////////////////////
-        // Input del movimiento (movimiento AD)
-        movement.x = Input.GetAxisRaw("Horizontal"); //movimiento Horizontal AD <- -> 
         if (Input.GetKeyDown(KeyCode.LeftShift))
         {
             running = true;
         }
-        else if (Input.GetKeyUp(KeyCode.LeftShift)) { running = false;}
+        else if (Input.GetKeyUp(KeyCode.LeftShift)) { running = false; }
+        ////////////////////////////////////////
+        // Input del salto (Salto space)
+        // Comprobar si el jugador está tocando el suelo
+        isGrounded = Physics2D.OverlapCircle(groundCheck.position, groundCheckRadius, groundLayer);
+        if (Input.GetButtonDown("Jump") && isGrounded)
+        {
+            rb.velocity = new Vector2(rb.velocity.x, jumpForce);
+        }
         ////////////////////////////////////////
     }
 
     private void FixedUpdate()
     {
         ////////////////////////////////////////
+        //Input del movimiento (movimiento AD)
+        float ejeXMovimientoPlayer = Input.GetAxisRaw("Horizontal"); //movimiento Horizontal AD <- -> 
         // Movimiento en si (movimiento AD)
-        if (running == true) {
-            Debug.Log("Corriendo");
-            rb.MovePosition(rb.position + movement * runSpeed); 
-        } 
+        if (running == true)
+        {
+            rb.velocity = new Vector2(ejeXMovimientoPlayer * runSpeed, rb.velocity.y);
+            //rb.velocity = new Vector2(moveInput * speed, rb.velocity.y);
+
+        }
         else {
-            Debug.Log("Normal");
-            rb.MovePosition(rb.position + movement * moveSpeed);
+            rb.velocity = new Vector2(ejeXMovimientoPlayer * moveSpeed, rb.velocity.y);
         }
         ////////////////////////////////////////
     }
