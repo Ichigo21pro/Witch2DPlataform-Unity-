@@ -26,6 +26,12 @@ public class MoviminetoJugador : MonoBehaviour
     public Transform groundCheck;
     public float groundCheckRadius = 0.2f;
     ////////////////////////////////////////
+    // (Coyote Time)
+    [Header("Coyote Time Settings")]
+    public float tiempoCoyoteTime = 0.1f; // Tiempo en el que aún puede saltar después de caer
+    private bool coyoteTime = false; // Para saber si estamos dentro de coyote time o no
+    private float temporizadorCoyote; // temporizador
+    ////////////////////////////////////////
     // (Gravity caida realista)
     [Header("Gravity Settings")]
     public float normalGravity = 2f;
@@ -52,18 +58,35 @@ public class MoviminetoJugador : MonoBehaviour
         {
             running = true;
         }
-        else if (Input.GetKeyUp(KeyCode.LeftShift)) 
-        { 
-            running = false; 
+        else if (Input.GetKeyUp(KeyCode.LeftShift))
+        {
+            running = false;
         }
         ////////////////////////////////////////
         // Input del salto (Salto space)
         // Comprobar si el jugador está tocando el suelo
         isGrounded = Physics2D.OverlapCircle(groundCheck.position, groundCheckRadius, groundLayer);
-        if (Input.GetButtonDown("Jump") && isGrounded)
+        // (Coyote Time) - Mantiene un temporizador si dejó de tocar el suelo
+        if (isGrounded)
+        {
+            coyoteTime = true;
+            temporizadorCoyote = 0;
+        }
+        if (!isGrounded && coyoteTime)
+        {
+            temporizadorCoyote += Time.deltaTime;
+            if (temporizadorCoyote > tiempoCoyoteTime)
+            {
+                coyoteTime = false;
+            }
+        }
+        // Input del salto (Salto space) con (Coyote Time)
+        if (Input.GetButtonDown("Jump") && (isGrounded || coyoteTime))
         {
             rb.velocity = new Vector2(rb.velocity.x, jumpForce);
+
         }
+
         ////////////////////////////////////////
         // Ajuste de gravedad cuando esta ponsitivo y cunado empieza a caer (Gravity caida realista)
         if (rb.velocity.y > 0) // Subiendo
@@ -89,7 +112,7 @@ public class MoviminetoJugador : MonoBehaviour
             //rb.velocity = new Vector2(moveInput * speed, rb.velocity.y);
 
         }
-        else 
+        else
         {
             rb.velocity = new Vector2(ejeXMovimientoPlayer * moveSpeed, rb.velocity.y);
         }
@@ -101,5 +124,17 @@ public class MoviminetoJugador : MonoBehaviour
         }
         ////////////////////////////////////////
     }
+    ////////////////////////////////////////
+    ////////////////////////////////////////
+    // Dibujar Gizmos para visualizar el groundCheckRadius en el editor
+    public void OnDrawGizmos()
+    {
+        if (groundCheck != null)
+        {
+            Gizmos.color = Color.green; // Color del círculo
+            Gizmos.DrawWireSphere(groundCheck.position, groundCheckRadius);
+        }
+    }
+
 
 }
