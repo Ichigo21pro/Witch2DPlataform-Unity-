@@ -29,8 +29,13 @@ public class MoviminetoJugador : MonoBehaviour
     // (Coyote Time)
     [Header("Coyote Time Settings")]
     public float tiempoCoyoteTime = 0.1f; // Tiempo en el que aún puede saltar después de caer
-    private bool coyoteTime = false; // Para saber si estamos dentro de coyote time o no
-    private float temporizadorCoyote; // temporizador
+    [SerializeField] private bool coyoteTime = false; // Para saber si estamos dentro de coyote time o no
+    [SerializeField] private float temporizadorCoyote; // temporizador
+    ////////////////////////////////////////
+    // (Jump buffer)
+    [Header("Jump Buffer")]
+    public float jumpBufferTime = 0.2f;
+    private float jumpBufferCounter;
     ////////////////////////////////////////
     // (Gravity caida realista)
     [Header("Gravity Settings")]
@@ -70,7 +75,7 @@ public class MoviminetoJugador : MonoBehaviour
         if (isGrounded)
         {
             coyoteTime = true;
-            temporizadorCoyote = 0;
+            temporizadorCoyote = 0f;
         }
         if (!isGrounded && coyoteTime)
         {
@@ -80,20 +85,33 @@ public class MoviminetoJugador : MonoBehaviour
                 coyoteTime = false;
             }
         }
-        // Input del salto (Salto space) con (Coyote Time)
-        if (Input.GetButtonDown("Jump") && (isGrounded || coyoteTime))
+        ////////////////////////////////////////
+        // detectamos y guardamos el salto antes de tocar el suelo (Jump buffer)
+        if (Input.GetButtonDown("Jump"))
+        {
+            jumpBufferCounter = jumpBufferTime;
+        }
+        else 
+        {
+            jumpBufferCounter -= Time.deltaTime;
+        }
+        ////////////////////////////////////////
+        // Input del salto (Salto space) con (Coyote Time) con modificacion de (Jump buffer)
+        if (jumpBufferCounter>0f && (isGrounded || coyoteTime))
         {
             rb.velocity = new Vector2(rb.velocity.x, jumpForce);
+            jumpBufferCounter = 0f;
+            temporizadorCoyote = 0f;
 
         }
 
         ////////////////////////////////////////
         // Ajuste de gravedad cuando esta ponsitivo y cunado empieza a caer (Gravity caida realista)
-        if (rb.velocity.y > 0) // Subiendo
+        if (rb.velocity.y > 0f) // Subiendo
         {
             rb.gravityScale = normalGravity;
         }
-        else if (rb.velocity.y < 0) // Cayendo
+        else if (rb.velocity.y < 0f) // Cayendo
         {
             rb.gravityScale = fallGravity;
         }
