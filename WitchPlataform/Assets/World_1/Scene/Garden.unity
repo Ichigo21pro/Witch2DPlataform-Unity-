@@ -1479,6 +1479,7 @@ GameObject:
   - component: {fileID: 1652028436}
   - component: {fileID: 1652028437}
   - component: {fileID: 1652028438}
+  - component: {fileID: 1652028439}
   m_Layer: 0
   m_Name: Player
   m_TagString: Untagged
@@ -1628,6 +1629,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 11cb72ea902719245b7e585bf316ffd4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  HabilidadesJugador: {fileID: 1652028439}
   moveSpeed: 4
   runSpeed: 7
   jumpForce: 7
@@ -1637,12 +1639,27 @@ MonoBehaviour:
   groundCheck: {fileID: 1104591360}
   groundCheckRadius: 0.1
   tiempoCoyoteTime: 0.1
-  coyoteTime: 0
-  temporizadorCoyote: 0
   jumpBufferTime: 0.2
   normalGravity: 2
   fallGravity: 4.5
   maxFallSpeed: -15
+--- !u!114 &1652028439
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1652028432}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0d8fda6f9d9905540a23659a1fc638c8, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  dobleSaltoDesbloqueado: 0
+  dashDesbloqueado: 1
+  dashSpeed: 20
+  dashDuration: 0.2
+  dashCooldown: 1
 --- !u!1 &1653737972
 GameObject:
   m_ObjectHideFlags: 0

@@ -5,21 +5,33 @@ using UnityEditor.Presets;
 using UnityEngine;
 using static UnityEditor.PlayerSettings;
 
+/*
+Antes de nada se tiene que añadir dos cosas,
+un emty object para que haga de groundCheck y un layer para lo que sera el suelo
+*/
+
 public class MoviminetoJugador : MonoBehaviour
 {
+    //referenciamos nuestras habilidades 
+    public HabilidadesJugador HabilidadesJugador;
     ////////////////////////////////////////
     // (movimiento AD)
     [Header("AD Move")]
     public float moveSpeed = 4f;
     public float runSpeed = 7f;
     bool running = false;
-    private Rigidbody2D rb;
+    private float direccion;
+    //pasamos valor de direccion
+    public float direccionValor => direccion;
+    //para que se pueda recoger desde otros scripts
+    public Rigidbody2D rb { get; private set; }
     Vector2 movement;
     ////////////////////////////////////////
     // (Salto space)
     [Header("Jump Move")]
     public float jumpForce = 7f;
-    private bool isGrounded;
+        //para que se pueda recoger desde otros scripts
+    public bool isGrounded { get; private set; }
     // LayerMask para definir qué es el suelo
     public LayerMask groundLayer;
     // Transform para detectar el suelo
@@ -29,8 +41,8 @@ public class MoviminetoJugador : MonoBehaviour
     // (Coyote Time)
     [Header("Coyote Time Settings")]
     public float tiempoCoyoteTime = 0.1f; // Tiempo en el que aún puede saltar después de caer
-    [SerializeField] private bool coyoteTime = false; // Para saber si estamos dentro de coyote time o no
-    [SerializeField] private float temporizadorCoyote; // temporizador
+    private bool coyoteTime = false; // Para saber si estamos dentro de coyote time o no
+    private float temporizadorCoyote; // temporizador
     ////////////////////////////////////////
     // (Jump buffer)
     [Header("Jump Buffer")]
@@ -39,20 +51,23 @@ public class MoviminetoJugador : MonoBehaviour
     ////////////////////////////////////////
     // (Gravity caida realista)
     [Header("Gravity Settings")]
-    public float normalGravity = 2f;
+    public float normalGravity = 2f ;
+    public float normalGravityValue => normalGravity;
     public float fallGravity = 4.5f; // gravedad aumentada al caer
     public float maxFallSpeed = -15f; // velocidad maxima de caida
     ////////////////////////////////////////
 
-    private void Start()
+    private void Awake()
     {
         ////////////////////////////////////////
         // (movimiento AD)
         // Obtener el componente Rigidbody2D del jugador
         rb = GetComponent<Rigidbody2D>();
+        ////////////////////////////////////////
         // (Gravity caida realista)
         // asignamos el valor al Rigidbody2D al iniciar el juego.
         rb.gravityScale = normalGravity;
+        
     }
 
     private void Update()
@@ -68,6 +83,63 @@ public class MoviminetoJugador : MonoBehaviour
             running = false;
         }
         ////////////////////////////////////////
+        // (Salto space)
+        if (!HabilidadesJugador.estaHaciendoDashValor)
+        {
+        Jump();
+        }
+    }
+
+    private void FixedUpdate()
+    {
+        ////////////////////////////////////////
+        //Input del movimiento (movimiento AD)
+        direccion = Input.GetAxisRaw("Horizontal"); //movimiento Horizontal AD <- -> 
+        // Movimiento en si (movimiento AD)
+        if (running)
+        {
+            if (!HabilidadesJugador.estaHaciendoDashValor)
+            {
+                rb.velocity = new Vector2(direccion * runSpeed, rb.velocity.y);
+            }
+        }
+        else
+        {
+            if (!HabilidadesJugador.estaHaciendoDashValor)
+            {
+                rb.velocity = new Vector2(direccion * moveSpeed, rb.velocity.y);
+            }
+        }
+        ////////////////////////////////////////
+        // Limitamos la velocidad de caida(Gravity caida realista)
+        if (rb.velocity.y < maxFallSpeed)
+        {
+            rb.velocity = new Vector2(rb.velocity.x, maxFallSpeed);
+        }
+        ////////////////////////////////////////
+    }
+
+
+
+
+
+
+    ////////////////////////////////////////
+    ////////////////////////////////////////
+    // Dibujar Gizmos para visualizar el groundCheckRadius en el editor
+    public void OnDrawGizmos()
+    {
+        if (groundCheck != null)
+        {
+            Gizmos.color = Color.green; // Color del círculo
+            Gizmos.DrawWireSphere(groundCheck.position, groundCheckRadius);
+        }
+    }
+
+
+
+    private void Jump()
+    { 
         // Input del salto (Salto space)
         // Comprobar si el jugador está tocando el suelo
         isGrounded = Physics2D.OverlapCircle(groundCheck.position, groundCheckRadius, groundLayer);
@@ -91,13 +163,13 @@ public class MoviminetoJugador : MonoBehaviour
         {
             jumpBufferCounter = jumpBufferTime;
         }
-        else 
+        else
         {
             jumpBufferCounter -= Time.deltaTime;
         }
         ////////////////////////////////////////
         // Input del salto (Salto space) con (Coyote Time) con modificacion de (Jump buffer)
-        if (jumpBufferCounter>0f && (isGrounded || coyoteTime))
+        if (jumpBufferCounter > 0f && (isGrounded || coyoteTime))
         {
             rb.velocity = new Vector2(rb.velocity.x, jumpForce);
             jumpBufferCounter = 0f;
@@ -115,44 +187,6 @@ public class MoviminetoJugador : MonoBehaviour
         {
             rb.gravityScale = fallGravity;
         }
-        ////////////////////////////////////////
+        ////////////////////////////////////////}
     }
-
-    private void FixedUpdate()
-    {
-        ////////////////////////////////////////
-        //Input del movimiento (movimiento AD)
-        float ejeXMovimientoPlayer = Input.GetAxisRaw("Horizontal"); //movimiento Horizontal AD <- -> 
-        // Movimiento en si (movimiento AD)
-        if (running)
-        {
-            rb.velocity = new Vector2(ejeXMovimientoPlayer * runSpeed, rb.velocity.y);
-            //rb.velocity = new Vector2(moveInput * speed, rb.velocity.y);
-
-        }
-        else
-        {
-            rb.velocity = new Vector2(ejeXMovimientoPlayer * moveSpeed, rb.velocity.y);
-        }
-        ////////////////////////////////////////
-        // Limitamos la velocidad de caida(Gravity caida realista)
-        if (rb.velocity.y < maxFallSpeed)
-        {
-            rb.velocity = new Vector2(rb.velocity.x, maxFallSpeed);
-        }
-        ////////////////////////////////////////
     }
-    ////////////////////////////////////////
-    ////////////////////////////////////////
-    // Dibujar Gizmos para visualizar el groundCheckRadius en el editor
-    public void OnDrawGizmos()
-    {
-        if (groundCheck != null)
-        {
-            Gizmos.color = Color.green; // Color del círculo
-            Gizmos.DrawWireSphere(groundCheck.position, groundCheckRadius);
-        }
-    }
-
-
-}
