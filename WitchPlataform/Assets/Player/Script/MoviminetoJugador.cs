@@ -26,6 +26,8 @@ public class MoviminetoJugador : MonoBehaviour
     //para que se pueda recoger desde otros scripts
     public Rigidbody2D rb { get; private set; }
     Vector2 movement;
+    // Nueva variable para controlar si el jugador puede moverse
+    public bool puedeMoverse = true;
     ////////////////////////////////////////
     // (Salto space)
     [Header("Jump Move")]
@@ -67,7 +69,8 @@ public class MoviminetoJugador : MonoBehaviour
         // (Gravity caida realista)
         // asignamos el valor al Rigidbody2D al iniciar el juego.
         rb.gravityScale = normalGravity;
-        
+        ////////////////////////////////////////
+
     }
 
     private void Update()
@@ -84,6 +87,7 @@ public class MoviminetoJugador : MonoBehaviour
         }
         ////////////////////////////////////////
         // (Salto space)
+        // este if esta desde el script de habilidades diciendonos que mientras no se este dasheando se puede saltar
         if (!HabilidadesJugador.estaHaciendoDashValor)
         {
         Jump();
@@ -92,12 +96,25 @@ public class MoviminetoJugador : MonoBehaviour
 
     private void FixedUpdate()
     {
+        // Si no puede moverse, cancelamos el movimiento
+        if (!puedeMoverse)
+        {
+            rb.velocity = new Vector2(0, rb.velocity.y);
+            return;
+        }
         ////////////////////////////////////////
         //Input del movimiento (movimiento AD)
         direccion = Input.GetAxisRaw("Horizontal"); //movimiento Horizontal AD <- -> 
+
+        // Volteamos el personaje si cambia de dirección
+        if (direccion != 0)
+        {
+            Flip();
+        }
         // Movimiento en si (movimiento AD)
         if (running)
         {
+            // este if esta desde el script de habilidades diciendonos que mientras no se este dasheando se puede correr
             if (!HabilidadesJugador.estaHaciendoDashValor)
             {
                 rb.velocity = new Vector2(direccion * runSpeed, rb.velocity.y);
@@ -105,6 +122,7 @@ public class MoviminetoJugador : MonoBehaviour
         }
         else
         {
+            // este if esta desde el script de habilidades diciendonos que mientras no se este dasheando se puede caminar
             if (!HabilidadesJugador.estaHaciendoDashValor)
             {
                 rb.velocity = new Vector2(direccion * moveSpeed, rb.velocity.y);
@@ -121,7 +139,30 @@ public class MoviminetoJugador : MonoBehaviour
 
 
 
-
+    // Función para voltear el personaje
+    private void Flip()
+    {
+        // Verificamos si el personaje se está moviendo a la derecha o izquierda
+        if (direccion > 0)
+        {
+            transform.localScale = new Vector3(1, 1, 1); // Dirección normal
+        }
+        else if (direccion < 0)
+        {
+            transform.localScale = new Vector3(-1, 1, 1); // Volteamos en el eje X
+        }
+    }
+    public void Flip(int direccion)
+    {
+        if (direccion > 0)
+        {
+            transform.localScale = new Vector3(1, 1, 1);
+        }
+        else if (direccion < 0)
+        {
+            transform.localScale = new Vector3(-1, 1, 1);
+        }
+    }
 
 
     ////////////////////////////////////////
