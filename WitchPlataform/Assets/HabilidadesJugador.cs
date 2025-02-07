@@ -17,7 +17,7 @@ public class HabilidadesJugador : MonoBehaviour
     [Header("Habilidad Dash")]
     public bool dashDesbloqueado = false;
     public float dashSpeed = 20f; // Velocidad del dash
-    public float dashDuration = 0.2f; // Duración del dash
+    [SerializeField] private float dashDuration = 0.2f; // Duración del dash
     public float dashCooldown = 1f; // Tiempo de recarga del dash
     private bool puedeHacerDash = true;
     private bool estaHaciendoDash = false;
@@ -26,21 +26,23 @@ public class HabilidadesJugador : MonoBehaviour
     ////////////////////////////////////////
     // (Wall Slide)
     [Header("Habilidad deslizamiento de pared")]
-    public Transform wallCheck;
-    public float wallCheckRadius = 0.2f;
+    public Transform wallCheck; // el detector de pared
+    [SerializeField]private Vector3 dimensionesWallCheck;
     public LayerMask paredLayer;
     private bool tocandoPared;
     private bool estaDeslizando;
+    public bool seEstaDeslizandoValue => estaDeslizando;
     public float wallSlideSpeed = 2f; // Velocidad de deslizamiento en la 
-                                      ////////////////////////////////////////
-
+    ////////////////////////////////////////
     // (wall jump)
     [Header("Habilidad salto de pared")]
     public bool wallJumpDesbloqueado = false;
-    public float wallJumpForceX = 10f; // Fuerza horizontal del salto en la pared
-    public float wallJumpForceY = 15f; // Fuerza vertical del salto en la pared
-    private bool puedeSaltarDePared = true; // Para evitar múltiples saltos seguidos
-
+    [SerializeField] private float wallJumpForceX = 10f; // Fuerza horizontal del salto en la pared
+    [SerializeField] private float wallJumpForceY = 15f; // Fuerza vertical del salto en la pared
+    [SerializeField] private float tiempoSaltoPared;
+    private bool puedeSaltarDePared ; // Para evitar múltiples saltos seguidos
+    public bool SaltandoParedValue => puedeSaltarDePared;
+    ////////////////////////////////////////
 
     private void Awake()
     {
@@ -50,6 +52,8 @@ public class HabilidadesJugador : MonoBehaviour
 
     private void Update()
     {
+        // Animaciones
+        // animator.Setbool("Deslizando",estaDeslizando);
         ////////////////////////////////////////
         // (doble salto)
         if (dobleSaltoDesbloqueado)
@@ -73,9 +77,22 @@ public class HabilidadesJugador : MonoBehaviour
         // (Wall Jump)
         if (wallJumpDesbloqueado)
         {
-            GestionarWallJump();
+            if (Input.GetButtonDown("Jump")&& tocandoPared && estaDeslizando)
+            {
+                WallJump();
+            }
+            
         }
 
+    }
+
+    private void FixedUpdate()
+    {
+        ////////////////////////////////////////
+        // (Wall Slide)
+        SeDesliza();
+
+        ////////////////////////////////////////
     }
 
 
@@ -122,8 +139,8 @@ public class HabilidadesJugador : MonoBehaviour
     {
         if (wallCheck != null)
         {
-            Gizmos.color = Color.green; // Color del círculo
-            Gizmos.DrawWireSphere(wallCheck.position, wallCheckRadius);
+            Gizmos.color = Color.yellow; // Color del Gizmo
+            Gizmos.DrawWireCube(wallCheck.position,dimensionesWallCheck);
         }
     }
     ////////////////////////////////////////
@@ -132,61 +149,62 @@ public class HabilidadesJugador : MonoBehaviour
     // Detecta si el jugador está tocando una pared
     private void DetectarPared()
     {
-        tocandoPared = Physics2D.OverlapCircle(wallCheck.position, wallCheckRadius, paredLayer);
+        tocandoPared = Physics2D.OverlapBox(wallCheck.position,dimensionesWallCheck,0f, paredLayer);
+        
     }
 
     // Maneja el deslizamiento en la pared
     private void GestionarWallSlide()
     {
-        if (tocandoPared && !jugador.isGrounded && jugador.rb.velocity.y <= 0)
+        if (!jugador.isGrounded && tocandoPared && jugador.direccionValor != 0) //si no esta tocando suelo, esta tocando pared y la direccion es distinta de 0
         {
             estaDeslizando = true;
-            jugador.rb.velocity = new Vector2(jugador.rb.velocity.x, -wallSlideSpeed);
         }
-        else
+        else 
         {
             estaDeslizando = false;
+        }
+
+       
+    }
+
+    private void SeDesliza()
+    {
+        if (estaDeslizando)
+        {
+            
+            jugador.rb.velocity = new Vector2(jugador.rb.velocity.x, (Mathf.Clamp(jugador.rb.velocity.y, -wallSlideSpeed, float.MaxValue)));
+            // Debug.Log("Me Deslizo a  = " + (Mathf.Clamp(jugador.rb.velocity.y, -wallSlideSpeed, float.MaxValue)));
+            // no se desliza porque hay que crear un material 2d sin friccion
         }
     }
 
     ////////////////////////////////////////
 
     // (Wall Jump)
-    private void GestionarWallJump()
+    private void WallJump()
     {
-        // Verifica si está tocando la pared, no está en el suelo y presiona el botón de salto
-        if (tocandoPared && !jugador.isGrounded && Input.GetButtonDown("Jump") && puedeSaltarDePared)
-        {
-            // Desactiva momentáneamente el control de movimiento para mayor fluidez
-            StartCoroutine(WallJumpCoroutine());
-        }
+        tocandoPared = false;
+        jugador.rb.velocity = new Vector2(wallJumpForceX*-jugador.direccionValor, wallJumpForceY);
+        //wait
+
+        jugador.evitandoFlip = true; // Evita el Flip automático
+        jugador.Flip(true); // Hace el Flip una vez al saltar de la pared
+        StartCoroutine(CambioSaltoPared());
     }
 
-    private IEnumerator WallJumpCoroutine()
+    IEnumerator CambioSaltoPared()
+
     {
-        puedeSaltarDePared = false; // Bloqueamos la capacidad de saltar nuevamente
-
-        // Determinamos la dirección de la pared: si está tocando una pared a la derecha, se mueve hacia la izquierda, y viceversa
-        int direccionSalto = jugador.direccionValor > 0 ? -1 : 1;
-
-        // Flip: cambiamos la dirección del personaje independientemente de hacia donde esté mirando
-        jugador.Flip(direccionSalto);
-
-        // Aplicamos una fuerza en dirección opuesta a la pared
-        jugador.rb.velocity = new Vector2(wallJumpForceX * direccionSalto, wallJumpForceY);
-
-        // Desactivamos temporalmente la gravedad para mayor control durante el salto
-        jugador.rb.gravityScale = 0.5f;
-
-        yield return new WaitForSeconds(0.2f); // Pequeña pausa para que el salto tenga efecto
-
-        // Restauramos la gravedad normal
-        jugador.rb.gravityScale = jugador.normalGravityValue;
-
-        // Breve cooldown para evitar múltiples saltos seguidos
-        yield return new WaitForSeconds(0.2f);
         puedeSaltarDePared = true;
+        yield return new WaitForSeconds(tiempoSaltoPared);
+        puedeSaltarDePared = false;
+        jugador.evitandoFlip = false; // Permite Flip nuevamente después del tiempo
     }
+    /*private IEnumerator WallJumpCoroutine()
+    {
+
+    }*/
 
     /*Desbloquear habilidades (doble salto)
     HabilidadJugador habilidades = jugador.GetComponent<HabilidadJugador>();

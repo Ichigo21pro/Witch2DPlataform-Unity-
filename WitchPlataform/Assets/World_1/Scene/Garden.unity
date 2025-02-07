@@ -1502,8 +1502,8 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1446460365}
   serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0.5, y: 0, z: 0}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 0.64, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -1745,8 +1745,8 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
-  - {fileID: 1104591360}
   - {fileID: 1446460366}
+  - {fileID: 1104591360}
   - {fileID: 1296054874}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -1853,7 +1853,7 @@ Rigidbody2D:
   m_LinearDrag: 0
   m_AngularDrag: 0.05
   m_GravityScale: 1
-  m_Material: {fileID: 0}
+  m_Material: {fileID: 6200000, guid: dda8e964cd14e1e4a8a562bed105ce3b, type: 2}
   m_IncludeLayers:
     serializedVersion: 2
     m_Bits: 0
@@ -1909,7 +1909,7 @@ MonoBehaviour:
   dashDuration: 0.2
   dashCooldown: 1
   wallCheck: {fileID: 1446460366}
-  wallCheckRadius: 0.04
+  dimensionesWallCheck: {x: 0.21, y: 1.53, z: 0}
   paredLayer:
     serializedVersion: 2
     m_Bits: 8
@@ -1917,6 +1917,7 @@ MonoBehaviour:
   wallJumpDesbloqueado: 1
   wallJumpForceX: 10
   wallJumpForceY: 15
+  tiempoSaltoPared: 0.2
 --- !u!1 &1653737972
 GameObject:
   m_ObjectHideFlags: 0

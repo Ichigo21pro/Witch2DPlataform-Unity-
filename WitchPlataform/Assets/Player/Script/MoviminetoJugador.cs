@@ -88,7 +88,7 @@ public class MoviminetoJugador : MonoBehaviour
         ////////////////////////////////////////
         // (Salto space)
         // este if esta desde el script de habilidades diciendonos que mientras no se este dasheando se puede saltar
-        if (!HabilidadesJugador.estaHaciendoDashValor)
+        if (!HabilidadesJugador.estaHaciendoDashValor && !HabilidadesJugador.seEstaDeslizandoValue)
         {
         Jump();
         }
@@ -115,7 +115,7 @@ public class MoviminetoJugador : MonoBehaviour
         if (running)
         {
             // este if esta desde el script de habilidades diciendonos que mientras no se este dasheando se puede correr
-            if (!HabilidadesJugador.estaHaciendoDashValor)
+            if (!HabilidadesJugador.estaHaciendoDashValor && !HabilidadesJugador.SaltandoParedValue)
             {
                 rb.velocity = new Vector2(direccion * runSpeed, rb.velocity.y);
             }
@@ -123,7 +123,7 @@ public class MoviminetoJugador : MonoBehaviour
         else
         {
             // este if esta desde el script de habilidades diciendonos que mientras no se este dasheando se puede caminar
-            if (!HabilidadesJugador.estaHaciendoDashValor)
+            if (!HabilidadesJugador.estaHaciendoDashValor && !HabilidadesJugador.SaltandoParedValue)
             {
                 rb.velocity = new Vector2(direccion * moveSpeed, rb.velocity.y);
             }
@@ -140,31 +140,24 @@ public class MoviminetoJugador : MonoBehaviour
 
 
     // Función para voltear el personaje
-    private void Flip()
+    public bool evitandoFlip = false; // Nueva variable para controlar el Flip
+    public void Flip(bool forzarFlip = false)
     {
-        // Verificamos si el personaje se está moviendo a la derecha o izquierda
-        if (direccion > 0)
+        if (!forzarFlip && evitandoFlip) return; // Evita cambiar la dirección si está bloqueado
+
+        // Si forzamos el flip, simplemente invertimos la escala actual
+        if (forzarFlip)
         {
-            transform.localScale = new Vector3(1, 1, 1); // Dirección normal
+            transform.localScale = new Vector3(-transform.localScale.x, 1, 1);
         }
-        else if (direccion < 0)
+        else
         {
-            transform.localScale = new Vector3(-1, 1, 1); // Volteamos en el eje X
+            if (direccion > 0)
+                transform.localScale = new Vector3(1, 1, 1);
+            else if (direccion < 0)
+                transform.localScale = new Vector3(-1, 1, 1);
         }
     }
-    public void Flip(int direccion)
-    {
-        if (direccion > 0)
-        {
-            transform.localScale = new Vector3(1, 1, 1);
-        }
-        else if (direccion < 0)
-        {
-            transform.localScale = new Vector3(-1, 1, 1);
-        }
-    }
-
-
     ////////////////////////////////////////
     ////////////////////////////////////////
     // Dibujar Gizmos para visualizar el groundCheckRadius en el editor
