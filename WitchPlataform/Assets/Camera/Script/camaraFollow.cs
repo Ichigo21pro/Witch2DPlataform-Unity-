@@ -5,18 +5,28 @@ using UnityEngine;
 public class camaraFollow : MonoBehaviour
 {
     [Header("Target Settings")]
-    public Transform target; // The object the camera will follow
+    public Transform target;
 
     [Header("Camera Settings")]
-    public float followSpeed = 5f; // Speed at which the camera follows the target
-    public Vector3 offset = new Vector3(0, 2, -10); // Offset position of the camera relative to the target
+    public float followSpeed = 7.5f;
+    public float smoothTime = 0.15f;
+    public Vector3 offset = new Vector3(0, 2, -10);
+
+    private Vector3 velocity = Vector3.zero;
 
     private void LateUpdate()
     {
         if (target != null)
         {
             Vector3 desiredPosition = target.position + offset;
-            transform.position = Vector3.Lerp(transform.position, desiredPosition, followSpeed * Time.deltaTime);
+            transform.position = Vector3.SmoothDamp(transform.position, desiredPosition, ref velocity, smoothTime);
         }
+    }
+
+    public void AdjustCamera(Vector3 newOffset, float newFollowSpeed, float newSmoothTime)
+    {
+        offset = newOffset;
+        followSpeed = newFollowSpeed;
+        smoothTime = newSmoothTime;
     }
 }

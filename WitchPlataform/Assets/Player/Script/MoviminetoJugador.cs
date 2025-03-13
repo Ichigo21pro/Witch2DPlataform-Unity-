@@ -88,7 +88,7 @@ public class MoviminetoJugador : MonoBehaviour
         ////////////////////////////////////////
         // (Salto space)
         // este if esta desde el script de habilidades diciendonos que mientras no se este dasheando se puede saltar
-        if (!HabilidadesJugador.estaHaciendoDashValor && !HabilidadesJugador.seEstaDeslizandoValue)
+        if (!HabilidadesJugador.estaHaciendoDashValor && !HabilidadesJugador.seEstaDeslizandoValue && !HabilidadesJugador.puedeVolarValor)
         {
         Jump();
         }
@@ -115,7 +115,7 @@ public class MoviminetoJugador : MonoBehaviour
         if (running)
         {
             // este if esta desde el script de habilidades diciendonos que mientras no se este dasheando se puede correr
-            if (!HabilidadesJugador.estaHaciendoDashValor && !HabilidadesJugador.SaltandoParedValue)
+            if (!HabilidadesJugador.estaHaciendoDashValor && !HabilidadesJugador.SaltandoParedValue && !HabilidadesJugador.puedeVolarValor)
             {
                 rb.velocity = new Vector2(direccion * runSpeed, rb.velocity.y);
             }
@@ -123,7 +123,7 @@ public class MoviminetoJugador : MonoBehaviour
         else
         {
             // este if esta desde el script de habilidades diciendonos que mientras no se este dasheando se puede caminar
-            if (!HabilidadesJugador.estaHaciendoDashValor && !HabilidadesJugador.SaltandoParedValue)
+            if (!HabilidadesJugador.estaHaciendoDashValor && !HabilidadesJugador.SaltandoParedValue && !HabilidadesJugador.puedeVolarValor)
             {
                 rb.velocity = new Vector2(direccion * moveSpeed, rb.velocity.y);
             }

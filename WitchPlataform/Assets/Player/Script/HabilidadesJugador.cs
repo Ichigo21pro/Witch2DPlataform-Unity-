@@ -43,10 +43,20 @@ public class HabilidadesJugador : MonoBehaviour
     private bool puedeSaltarDePared ; // Para evitar múltiples saltos seguidos
     public bool SaltandoParedValue => puedeSaltarDePared;
     ////////////////////////////////////////
+    //  (volar)
+    [Header("Habilidad vuelo")]
+    public bool vueloDesbloqueado = false;
+    private bool puedevolar ;
+    [SerializeField] private float velocidadVuelo = 5f; // Velocidad de movimiento en vuelo
+    private bool estaVolando = false;
+    public bool puedeVolarValor => puedevolar;
+    public Transform escobaVoladora;
+    public bool estaActivaEscoba = false;
 
     private void Awake()
     {
         jugador = GetComponent<MoviminetoJugador>();
+        escobaVoladora.gameObject.SetActive(estaActivaEscoba);
     }
     
 
@@ -82,6 +92,13 @@ public class HabilidadesJugador : MonoBehaviour
                 WallJump();
             }
             
+        }
+        ////////////////////////////////////////
+        // (volar)
+        if (vueloDesbloqueado)
+        {
+
+            Vuelo();
         }
 
     }
@@ -201,10 +218,42 @@ public class HabilidadesJugador : MonoBehaviour
         puedeSaltarDePared = false;
         jugador.evitandoFlip = false; // Permite Flip nuevamente después del tiempo
     }
-    /*private IEnumerator WallJumpCoroutine()
-    {
 
-    }*/
+    ////////////////////////////////////////
+    // (volar)
+    private void Vuelo()
+    {
+        if (Input.GetKeyDown(KeyCode.V))
+        {
+            estaActivaEscoba = !estaActivaEscoba;
+            estaVolando = !estaVolando; // Alterna el estado de vuelo
+            escobaVoladora.gameObject.SetActive(estaActivaEscoba); // Activar escoba
+            if (estaVolando)
+            {
+                jugador.rb.gravityScale = 0f; // Desactiva la gravedad
+                jugador.rb.velocity = Vector2.zero; // Detiene el movimiento actual
+            }
+            else
+            {
+                jugador.rb.gravityScale = jugador.normalGravityValue; // Restaura la gravedad
+            }
+        }
+
+        if (estaVolando)
+        {
+            float moverX = 0f;
+            float moverY = 0f;
+
+            if (Input.GetKey(KeyCode.A)) moverX = -1f; // Izquierda
+            if (Input.GetKey(KeyCode.D)) moverX = 1f; // Derecha
+            if (Input.GetKey(KeyCode.W)) moverY = 1f; // Arriba
+            if (Input.GetKey(KeyCode.S)) moverY = -1f; // Abajo
+
+            Vector2 movimiento = new Vector2(moverX, moverY).normalized * velocidadVuelo;
+            jugador.rb.velocity = movimiento;
+        }
+    }
+
 
     /*Desbloquear habilidades (doble salto)
     HabilidadJugador habilidades = jugador.GetComponent<HabilidadJugador>();
