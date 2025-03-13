@@ -120,7 +120,7 @@ public class MovimientoMuñecoPractica : MonoBehaviour
         // si esta corriendo activamos bool
         if (isGround)
         {
-            isRunning = Input.GetKey(KeyCode.LeftShift);
+            isRunning = Input.GetKey(KeyCode.LeftShift) && direccion != 0;
             currentSpeed = isRunning ? runSpeed : moveSpeed;
         }
         // Volteamos el personaje si cambia de dirección
