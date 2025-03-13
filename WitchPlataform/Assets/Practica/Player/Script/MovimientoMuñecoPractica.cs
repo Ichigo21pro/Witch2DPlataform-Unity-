@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using Unity.VisualScripting;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class MovimientoMuñecoPractica : MonoBehaviour
 {
@@ -12,7 +13,7 @@ public class MovimientoMuñecoPractica : MonoBehaviour
     [Header("AD Move")]
     [SerializeField] private float moveSpeed = 4f;
     private float direccion;
-    
+
     ////////////////////////////////////////
     // (salto)
     [Header("Salto")]
@@ -65,35 +66,40 @@ public class MovimientoMuñecoPractica : MonoBehaviour
     [SerializeField] private bool isRunning; // Bool para saber cuando esta corriendo
     [SerializeField] private float runSpeed = 7f; // Velocidad al correr
     private float currentSpeed;
+    ////////////////////////////////////////
+    private bool isDead = false; // Para evitar múltiples llamadas a Die()
+
 
     ////////////////////////////////////////
     ////////////////////////////////////////
     private void Update()
-    { 
-        if (!puedeSaltarDePared ) 
+    {
+         
+        if (!puedeSaltarDePared)
         {
-            Moverse(); 
+            Moverse();
         }
-        
-        if (!estaDeslizando ) 
+
+        if (!estaDeslizando)
         {
             Saltar();
         }
 
         ////////////////////////////////////////
         // (Wall Slide)
-        
-            DetectarPared();
-            GestionarWallSlide();
-        
-       
-        
+
+        DetectarPared();
+        GestionarWallSlide();
+
+
+
         ////////////////////////////////////////
         // (Wall Jump)    
         if (Input.GetButtonDown("Jump") && tocandoPared && estaDeslizando)
-            {
-                WallJump();
-            }
+        {
+            WallJump();
+        }
+        
         ////////////////////////////////////////
 
 
@@ -104,7 +110,7 @@ public class MovimientoMuñecoPractica : MonoBehaviour
     private void FixedUpdate()
     {
         //animacion para correr
-        animator.SetFloat("xVelocity",Math.Abs( rb.velocity.x));
+        animator.SetFloat("xVelocity", Math.Abs(rb.velocity.x));
         animator.SetFloat("yVelocity", rb.velocity.y);
         //slide wall
         SeDesliza();
@@ -178,7 +184,7 @@ public class MovimientoMuñecoPractica : MonoBehaviour
         }
 
         // Si mantiene el botón de salto y aún puede extenderlo
-        if (Input.GetButton("Jump") && isJumping )
+        if (Input.GetButton("Jump") && isJumping)
         {
             if (jumpTimeCounter > 0)
             {
@@ -311,8 +317,47 @@ public class MovimientoMuñecoPractica : MonoBehaviour
             Gizmos.DrawWireCube(groundCheck.position, dimensionesGroundCheck);
             Gizmos.DrawWireCube(wallCheck.position, dimensionesWallCheck);
             Gizmos.color = Color.cyan; // Color diferente para la esquina
-           
-        
+
+
         }
     }
+
+
+    //////////////////////////
+    /// MUERTE
+    private void OnTriggerEnter2D(Collider2D other)
+    {
+        if (other.CompareTag("Trampa") && !isDead)
+        {
+            Die();
+        }
+    }
+    private IEnumerator RestartAfterDeath()
+    {
+        yield return new WaitForSeconds(1f); // Espera la animación de muerte
+        SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex); // Reinicia la escena
+    }
+    public void Die()
+    {
+        if (isDead) return; // Evita que la muerte se ejecute varias veces
+
+        isDead = true;
+        animator.SetTrigger("Die"); // Activa la animación de muerte
+
+        // Detener otras animaciones
+        animator.SetFloat("xVelocity", 0);
+        animator.SetFloat("yVelocity", 0);
+        animator.SetBool("isJumping", false);
+        animator.SetBool("isGround", false);
+        animator.SetBool("isRunning", false);
+        animator.SetBool("isWallSliding", false);
+
+        // Congelar movimiento del personaje
+        rb.velocity = Vector2.zero;
+        rb.gravityScale = 0;
+        rb.constraints = RigidbodyConstraints2D.FreezeAll;
+
+        StartCoroutine(RestartAfterDeath()); // Esperar y reiniciar escena
+    }
+
 }
