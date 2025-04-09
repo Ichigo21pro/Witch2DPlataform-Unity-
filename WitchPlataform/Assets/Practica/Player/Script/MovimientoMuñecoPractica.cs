@@ -177,7 +177,9 @@ public class MovimientoMuñecoPractica : MonoBehaviour
         {
             isJumping = true; // Estamos saltando
             jumpTimeCounter = jumpTimeMax; // Reiniciamos el contador del salto extendido
+            
             rb.velocity = new Vector2(direccion * currentSpeed, jumpPower);
+          
             jumpBufferCounter = 0f;
             temporizadorCoyote = 0f;
             animator.SetBool("isJumping", true);
